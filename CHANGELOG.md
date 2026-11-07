@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0 — 2026-11-07
+
+- Added the modern shell to the NBA, football, esports, and multi-sport channel pages.
+- Added redesigns for the news channels on `news.zhibo8.com`.
+- Added full live-match page styling for football, basketball, and other sports, including scoreboards, event feeds, lineups, stats tables, and the comment area.
+- Added a redesigned finished-schedule archive.
+- Added a modern reading layout for news articles and video detail pages.
+- Added channel mastheads, automatic active-navigation state, and a responsive channel/date/media grid.
+- The header theme switch and popup enable/disable controls now work on every supported page.
+- Improved dark-theme coverage for legacy subpage modules, tables, sidebar rows, and comment widgets.
+- Kept external services (`比分`, `数据`, `资料`, `个人`) and legacy pages outside the content-script scope.
+
 ## 1.0.1 — 2026-11-07
 
 - Fixed the site header not staying attached to the top of the viewport while scrolling.

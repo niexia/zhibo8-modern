@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "直播吧 Modern — Zhibo8 现代主题",
   "short_name": "Zhibo8 Modern",
-  "version": "1.0.1",
-  "version_name": "1.0.1",
-  "description": "为直播吧首页带来现代布局、清爽排版与明暗主题，并保留原有内容与功能。开源、无追踪。",
+  "version": "1.1.0",
+  "version_name": "1.1.0",
+  "description": "为直播吧首页、频道页与直播详情页带来现代布局、清爽排版与明暗主题，并保留原有内容与功能。开源、无追踪。",
   "homepage_url": "https://github.com/niexia/zhibo8-modern",
   "minimum_chrome_version": "111",
   "icons": {
@@ -30,7 +30,8 @@
     {
       "matches": [
         "https://zhibo8.com/*",
-        "https://www.zhibo8.com/*"
+        "https://www.zhibo8.com/*",
+        "https://news.zhibo8.com/*"
       ],
       "css": [
         "theme.css"
