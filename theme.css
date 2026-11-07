@@ -120,6 +120,8 @@ html.zb8-on[data-zb8-theme="dark"] {
 
 html.zb8-on body {
   min-width: 0;
+  min-height: 100vh;
+  height: auto;
   margin: 0;
   background-color: var(--zb8-bg);
   background-image:
@@ -132,7 +134,7 @@ html.zb8-on body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html.zb8-on ::selection {
@@ -1207,11 +1209,9 @@ html.zb8-on .schedule .stype {
   height: auto;
   min-height: 64px;
   padding: 12px 20px;
-  background: color-mix(in srgb, var(--zb8-surface) 92%, transparent);
+  background: var(--zb8-surface);
   border-bottom: 1px solid var(--zb8-line);
   border-radius: 20px 20px 0 0;
-  -webkit-backdrop-filter: blur(18px) saturate(1.3);
-  backdrop-filter: blur(18px) saturate(1.3);
 }
 
 html.zb8-on .schedule .stype::before {
@@ -2418,4 +2418,13 @@ html.zb8-on .schedule .vct-box.zb8-empty-day > ._header::after {
 
 html.zb8-on .schedule .vct-box.zb8-empty-day > ._content {
   display: none;
+}
+
+/* The host positions its filter panel absolutely inside .schedule. When the
+   filter bar is stuck below the header, JS docks the panel to the viewport so
+   it stays attached to the visible bar. */
+html.zb8-on .schedule > .more-stype.zb8-popover-docked {
+  z-index: 180;
+  margin: 0;
+  box-shadow: var(--zb8-shadow);
 }

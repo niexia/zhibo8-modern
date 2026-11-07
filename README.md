@@ -5,7 +5,7 @@
   <p>更清晰的层级、更舒服的留白，以及一套真正好用的深色模式。</p>
 
   <p>
-    <a href="https://github.com/niexia/zhibo8-modern/releases"><img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-d8ff4f?style=flat-square"></a>
+    <a href="https://github.com/niexia/zhibo8-modern/releases"><img alt="Release" src="https://img.shields.io/badge/release-v1.0.1-d8ff4f?style=flat-square"></a>
     <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-1d5eff?style=flat-square"></a>
     <img alt="Chrome 111+" src="https://img.shields.io/badge/Chrome-111%2B-0b1220?style=flat-square">
     <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-0e9f8f?style=flat-square">
@@ -27,6 +27,7 @@
 - **重新设计的信息模块**：足球 / 篮球视频、资讯、完赛比分、电竞资讯、球队榜与球员榜都使用统一的视觉语言。
 - **仍然是你熟悉的直播吧**：链接、筛选、比分标签页、赛程交互全部保留，扩展不改写站点数据。
 - **响应式布局**：针对 1440、1280、1024、768px 视口做了分级适配，窄屏下自动转为单列。
+- **滚动时保持上下文**：顶部导航与赛程筛选栏保持吸顶，筛选浮层会跟随筛选栏。
 - **随手开关**：在扩展弹窗里关闭主题，页面立即恢复原样，无需刷新。
 - **零追踪**：不引入分析、广告或遥测；扩展本身不发起任何外部网络请求。
 
@@ -138,7 +139,7 @@ python3 -m json.tool manifest.json > /dev/null
 
 ```bash
 ./scripts/package.sh
-# dist/zhibo8-modern-v1.0.0.zip
+# dist/zhibo8-modern-v1.0.1.zip
 ```
 
 发布前建议手动检查：

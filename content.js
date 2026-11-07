@@ -30,6 +30,8 @@
   let hero = null;
   let observer = null;
   let scanTimer = 0;
+  let popoverRaf = 0;
+  let interactionsBound = false;
   let lastSignature = '';
   let booted = false;
 
@@ -136,6 +138,7 @@
   function boot() {
     if (booted) return;
     booted = true;
+    bindScheduleInteractions();
     applyPrefs();
     loadPrefs();
 
@@ -236,6 +239,84 @@
   /* Schedule scanning                                                   */
   /* ------------------------------------------------------------------ */
 
+  function bindScheduleInteractions() {
+    if (interactionsBound) return;
+    interactionsBound = true;
+
+    window.addEventListener('scroll', schedulePopoverSync, { passive: true });
+    window.addEventListener('resize', schedulePopoverSync, { passive: true });
+
+    // The host opens its filter panel through a jQuery click handler. Sync
+    // after the panel becomes visible (and once more after its fade-in).
+    document.addEventListener('click', (event) => {
+      if (!prefs.enabled || !event.target.closest?.('#shaixuan')) return;
+      window.setTimeout(syncSchedulePopover, 0);
+      window.setTimeout(syncSchedulePopover, 80);
+      window.setTimeout(syncSchedulePopover, 300);
+    }, true);
+  }
+
+  function schedulePopoverSync() {
+    if (popoverRaf) return;
+    popoverRaf = window.requestAnimationFrame(() => {
+      popoverRaf = 0;
+      syncSchedulePopover();
+    });
+  }
+
+  // The schedule filter bar is sticky. Keep the host's absolutely-positioned
+  // filter panel attached to it instead of leaving the panel stranded at the
+  // top of the schedule when the page is scrolled.
+  function syncSchedulePopover() {
+    if (!prefs.enabled || !document.body) return;
+    const panel = document.querySelector('.schedule > .more-stype');
+    if (!panel) return;
+
+    if (getComputedStyle(panel).display === 'none') {
+      undockSchedulePopover(panel);
+      return;
+    }
+
+    const schedule = panel.parentElement;
+    const bar = schedule.querySelector(':scope > .stype');
+    const menu = document.querySelector('.menu');
+    if (!bar || !menu) {
+      undockSchedulePopover(panel);
+      return;
+    }
+
+    const headerBottom = menu.getBoundingClientRect().bottom;
+    const barRect = bar.getBoundingClientRect();
+    const stuck = barRect.top <= headerBottom + 1;
+
+    if (!stuck) {
+      undockSchedulePopover(panel);
+      return;
+    }
+
+    const scheduleRight = schedule.getBoundingClientRect().right;
+    const top = Math.round(barRect.bottom + 8);
+    const right = Math.max(20, Math.round(window.innerWidth - scheduleRight + 20));
+    const maxHeight = Math.max(320, Math.round(window.innerHeight - top - 16));
+
+    panel.classList.add('zb8-popover-docked');
+    panel.style.position = 'fixed';
+    panel.style.top = `${top}px`;
+    panel.style.right = `${right}px`;
+    panel.style.maxHeight = `${maxHeight}px`;
+    panel.style.overflowY = 'auto';
+  }
+
+  function undockSchedulePopover(panel) {
+    if (!panel) return;
+    panel.classList.remove('zb8-popover-docked');
+    panel.style.removeProperty('position');
+    panel.style.removeProperty('top');
+    panel.style.removeProperty('right');
+    panel.style.removeProperty('max-height');
+    panel.style.removeProperty('overflow-y');
+  }
+
   function startObserving() {
     if (observer || !document.body) return;
     observer = new MutationObserver(() => scheduleScan());
@@ -264,6 +345,7 @@
         const model = readSchedule();
         if (!model) return;
         renderHero(model);
+        syncSchedulePopover();
       } catch (error) {
         // A host markup change should never take the original page down. The
         // stylesheet can keep working even if the optional match rail cannot.
@@ -605,6 +687,7 @@
     window.clearTimeout(scanTimer);
     scanTimer = 0;
     lastSignature = '';
+    undockSchedulePopover(document.querySelector('.schedule > .more-stype'));
     removeHero();
     navButton?.remove();
     navButton = null;
