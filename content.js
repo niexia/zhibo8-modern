@@ -3,7 +3,8 @@
  *
  * The content script only runs on the zhibo8.com homepage. It adds a modern
  * motion/layout layer on top of the original page: a theme switch in the
- * header and an optional matchday rail sourced from the page's own schedule.
+ * header, an adjustable simplified navigation, and an optional matchday rail
+ * sourced from the page's own schedule.
  *
  * All remote content is rendered with textContent / DOM APIs. No vendor HTML
  * is injected as markup.
@@ -19,6 +20,7 @@
     enabled: true,
     theme: 'auto',
     showMatchBar: true,
+    simplifyNav: true,
   });
   const THEMES = new Set(['auto', 'light', 'dark']);
   const CACHE_KEY = 'zb8-modern:prefs:v1';
@@ -71,6 +73,9 @@
       showMatchBar: typeof merged.showMatchBar === 'boolean'
         ? merged.showMatchBar
         : DEFAULTS.showMatchBar,
+      simplifyNav: typeof merged.simplifyNav === 'boolean'
+        ? merged.simplifyNav
+        : DEFAULTS.simplifyNav,
     };
   }
 
@@ -133,6 +138,7 @@
   if (prefs.enabled) {
     root.classList.add('zb8-on');
     root.dataset.zb8Theme = prefs.theme;
+    root.dataset.zb8Simplify = String(prefs.simplifyNav);
   }
 
   function boot() {
@@ -176,6 +182,7 @@
     if (prefs.enabled) {
       root.classList.add('zb8-on');
       root.dataset.zb8Theme = prefs.theme;
+      root.dataset.zb8Simplify = String(prefs.simplifyNav);
       ensureNavButton();
       startObserving();
       scheduleScan();
@@ -183,6 +190,7 @@
       teardownUi();
       root.classList.remove('zb8-on');
       root.removeAttribute('data-zb8-theme');
+      root.removeAttribute('data-zb8-simplify');
     }
     updateNavButton();
   }
@@ -692,5 +700,6 @@
     navButton?.remove();
     navButton = null;
     document.querySelector('.schedule#zb8-schedule')?.removeAttribute('id');
+    root.removeAttribute('data-zb8-simplify');
   }
 })();

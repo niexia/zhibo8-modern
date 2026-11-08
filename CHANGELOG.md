@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.1 — 2026-11-08
+
+- Reverted the multi-page expansion. Only the zhibo8.com homepage is themed again; channels, live match pages, schedules, and content details keep the original site.
+- Links from the homepage to video, news, live, and other subpages now open untouched original pages.
+- Added a default-on **simplified navigation**: hide every top-level nav entry except 首页.
+- Added a popup switch for the simplified navigation, with all other homepage options unchanged.
+- Kept the sticky header, schedule filter, matchday rail, light/dark themes, and popup enable switch from the homepage release.
+
+## 1.1.0 — 2026-11-07
+
+- Multi-page channel, live match, finish-schedule, and article-detail theme experiment.
+- Reverted in 1.1.1; the release remains available in the repository history.
+
 ## 1.0.1 — 2026-11-07
 
 - Fixed the site header not staying attached to the top of the viewport while scrolling.

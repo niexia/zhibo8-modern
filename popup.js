@@ -6,6 +6,7 @@
     enabled: true,
     theme: 'auto',
     showMatchBar: true,
+    simplifyNav: true,
   });
   const THEMES = new Set(['auto', 'light', 'dark']);
   const REPO_URL = 'https://github.com/niexia/zhibo8-modern';
@@ -13,6 +14,7 @@
   const els = {
     enabled: document.getElementById('enabled'),
     matchbar: document.getElementById('matchbar'),
+    simplifyNav: document.getElementById('simplifyNav'),
     status: document.getElementById('status'),
     version: document.getElementById('version'),
     repo: document.getElementById('repo-link'),
@@ -30,6 +32,9 @@
       showMatchBar: typeof merged.showMatchBar === 'boolean'
         ? merged.showMatchBar
         : DEFAULTS.showMatchBar,
+      simplifyNav: typeof merged.simplifyNav === 'boolean'
+        ? merged.simplifyNav
+        : DEFAULTS.simplifyNav,
     };
   }
 
@@ -45,6 +50,7 @@
   function render() {
     els.enabled.checked = prefs.enabled;
     els.matchbar.checked = prefs.showMatchBar;
+    els.simplifyNav.checked = prefs.simplifyNav;
     for (const input of els.themeInputs) input.checked = input.value === prefs.theme;
 
     els.status.innerHTML = '<i aria-hidden="true"></i>';
@@ -86,6 +92,7 @@
 
   els.enabled.addEventListener('change', () => update({ enabled: els.enabled.checked }));
   els.matchbar.addEventListener('change', () => update({ showMatchBar: els.matchbar.checked }));
+  els.simplifyNav.addEventListener('change', () => update({ simplifyNav: els.simplifyNav.checked }));
 
   for (const input of els.themeInputs) {
     input.addEventListener('change', () => {

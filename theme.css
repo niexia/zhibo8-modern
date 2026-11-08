@@ -2428,3 +2428,9 @@ html.zb8-on .schedule > .more-stype.zb8-popover-docked {
   margin: 0;
   box-shadow: var(--zb8-shadow);
 }
+
+
+/* Simplified homepage navigation: only the first "首页" entry remains. */
+html.zb8-on[data-zb8-simplify="true"] .menu .nav > ul > li:not(:first-child) {
+  display: none !important;
+}
