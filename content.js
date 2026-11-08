@@ -1,9 +1,9 @@
 /**
  * Zhibo8 Modern — content script
  *
- * Supports the main zhibo8.com homepage, the video/news channel pages, and
- * the live match detail pages. The theme switch and modern header are shared
- * everywhere; the matchday rail is a homepage-only enhancement.
+ * The content script only runs on the zhibo8.com homepage. It adds a modern
+ * motion/layout layer on top of the original page: a theme switch in the
+ * header and an optional matchday rail sourced from the page's own schedule.
  *
  * All remote content is rendered with textContent / DOM APIs. No vendor HTML
  * is injected as markup.
@@ -12,11 +12,8 @@
   'use strict';
 
   const HOME_PATHS = new Set(['/', '/index.htm', '/index.html']);
-  const PAGE_INFO = detectPage();
-
-  if (!PAGE_INFO) return;
-
-  const IS_HOME = PAGE_INFO.type === 'home';
+  if (!HOME_PATHS.has(window.location.pathname)) return;
+  if (!/(^|\.)zhibo8\.com$/i.test(window.location.hostname)) return;
 
   const DEFAULTS = Object.freeze({
     enabled: true,
@@ -30,7 +27,6 @@
 
   let prefs = { ...DEFAULTS, ...readCache() };
   let navButton = null;
-  let channelHead = null;
   let hero = null;
   let observer = null;
   let scanTimer = 0;
@@ -62,63 +58,6 @@
         <path d="m9 6 6 6-6 6"></path>
       </svg>`,
   };
-
-  /* ------------------------------------------------------------------ */
-  /* Page detection                                                      */
-  /* ------------------------------------------------------------------ */
-
-  function detectPage() {
-    const host = window.location.hostname.toLowerCase();
-    const path = window.location.pathname;
-
-    if (host === 'zhibo8.com' || host === 'www.zhibo8.com') {
-      if (HOME_PATHS.has(path)) return { type: 'home', channel: 'home' };
-      if (path.startsWith('/zhibo/')) {
-        const sport = path.split('/')[2] || '';
-        const channel = sport === 'nba' ? 'nba'
-          : sport === 'zuqiu' ? 'zuqiu'
-            : sport === 'game' ? 'dianjing'
-              : 'other';
-        return { type: 'live', channel };
-      }
-      if (path === '/schedule/finish_more.htm') {
-        return { type: 'schedule', channel: 'schedule' };
-      }
-      if (/^\/nba\/?$/i.test(path)) return { type: 'zixun', channel: 'nba' };
-      if (/^\/zuqiu\/?$/i.test(path)) return { type: 'zixun', channel: 'zuqiu' };
-      if (path === '/dianjing/' || path === '/dianjing' || path === '/dianjing/video_list.htm') {
-        return { type: 'media', channel: 'dianjing' };
-      }
-      if (path === '/other/' || path === '/other') {
-        return { type: 'media', channel: 'other' };
-      }
-      if (/^\/(nba|zuqiu|other|game)\/\d{4}\//i.test(path)) {
-        const segment = path.split('/')[1].toLowerCase();
-        const channel = segment === 'game' ? 'dianjing' : segment;
-        return { type: 'detail', channel };
-      }
-      return null;
-    }
-
-    if (host === 'news.zhibo8.com') {
-      if (/^\/nba\/?$/i.test(path)) return { type: 'zixun', channel: 'nba' };
-      if (/^\/zuqiu\/?$/i.test(path)) return { type: 'zixun', channel: 'zuqiu' };
-      if (path === '/dianjing/' || path === '/dianjing') {
-        return { type: 'media', channel: 'dianjing' };
-      }
-      if (path === '/other/' || path === '/other' || path === '/game/') {
-        return { type: 'media', channel: 'other' };
-      }
-      if (/^\/(nba|zuqiu|other|game)\/\d{4}-\d{2}-\d{2}\//i.test(path)) {
-        const segment = path.split('/')[1].toLowerCase();
-        const channel = segment === 'game' ? 'dianjing' : segment;
-        return { type: 'detail', channel };
-      }
-      return null;
-    }
-
-    return null;
-  }
 
   /* ------------------------------------------------------------------ */
   /* Preferences                                                         */
@@ -194,14 +133,12 @@
   if (prefs.enabled) {
     root.classList.add('zb8-on');
     root.dataset.zb8Theme = prefs.theme;
-    root.dataset.zb8Page = PAGE_INFO.type;
-    root.dataset.zb8Channel = PAGE_INFO.channel;
   }
 
   function boot() {
     if (booted) return;
     booted = true;
-    if (IS_HOME) bindScheduleInteractions();
+    bindScheduleInteractions();
     applyPrefs();
     loadPrefs();
 
@@ -239,21 +176,13 @@
     if (prefs.enabled) {
       root.classList.add('zb8-on');
       root.dataset.zb8Theme = prefs.theme;
-      root.dataset.zb8Page = PAGE_INFO.type;
-      root.dataset.zb8Channel = PAGE_INFO.channel;
       ensureNavButton();
-      markActiveNav();
-      ensureChannelHeader();
-      if (IS_HOME) {
-        startObserving();
-        scheduleScan();
-      }
+      startObserving();
+      scheduleScan();
     } else {
       teardownUi();
       root.classList.remove('zb8-on');
       root.removeAttribute('data-zb8-theme');
-      root.removeAttribute('data-zb8-page');
-      root.removeAttribute('data-zb8-channel');
     }
     updateNavButton();
   }
@@ -291,7 +220,6 @@
     const user = container.querySelector('.user');
     container.insertBefore(navButton, user || null);
     updateNavButton();
-    markActiveNav();
   }
 
   function updateNavButton() {
@@ -305,191 +233,6 @@
     const autoHint = prefs.theme === 'auto' ? '（当前跟随系统）' : '';
     button.setAttribute('aria-label', `切换到${nextLabel}主题${autoHint}`);
     button.title = `切换到${nextLabel}主题${autoHint}`;
-  }
-
-  function markActiveNav() {
-    const nav = document.querySelector('.menu .nav');
-    if (!nav || !prefs.enabled) return;
-
-    nav.querySelectorAll('.zb8-nav-active').forEach((node) => {
-      node.classList.remove('zb8-nav-active');
-      node.removeAttribute('aria-current');
-    });
-
-    if (PAGE_INFO.type === 'schedule') return;
-
-    const targetPath = targetNavPath();
-    if (!targetPath) return;
-
-    const currentHost = normalizeHost(window.location.hostname);
-    let directMatch = null;
-    let childMatch = null;
-
-    for (const anchor of nav.querySelectorAll('a[href]')) {
-      let url;
-      try {
-        url = new URL(anchor.getAttribute('href') || '', window.location.href);
-      } catch {
-        continue;
-      }
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') continue;
-      if (normalizeHost(url.hostname) !== currentHost) continue;
-
-      const hrefPath = normalizePath(url.pathname);
-      const target = normalizePath(targetPath);
-      const matches = target === '/'
-        ? hrefPath === '/'
-        : hrefPath === target || hrefPath.startsWith(`${target}/`);
-      if (!matches) continue;
-
-      if (anchor.closest('.child_navs')) {
-        childMatch ||= anchor;
-      } else {
-        directMatch = anchor;
-        break;
-      }
-    }
-
-    let active = directMatch;
-    if (!active && childMatch) {
-      const parentList = childMatch.closest('.child_navs');
-      const parentItem = parentList?.closest('li');
-      active = parentItem?.querySelector(':scope > a') || null;
-    }
-
-    if (active) {
-      active.classList.add('zb8-nav-active');
-      active.setAttribute('aria-current', 'page');
-    }
-  }
-
-  function targetNavPath() {
-    if (PAGE_INFO.type === 'home') return '/';
-    if (PAGE_INFO.type === 'live') {
-      if (PAGE_INFO.channel === 'nba') return '/nba/';
-      if (PAGE_INFO.channel === 'zuqiu') return '/zuqiu/';
-      if (PAGE_INFO.channel === 'dianjing') return '/dianjing/';
-      return '/other/';
-    }
-    if (PAGE_INFO.type === 'zixun') return `/${PAGE_INFO.channel}/`;
-    if (PAGE_INFO.type === 'media') return `/${PAGE_INFO.channel}/`;
-    if (PAGE_INFO.type === 'detail') {
-      if (PAGE_INFO.channel === 'dianjing') return '/dianjing/';
-      return `/${PAGE_INFO.channel}/`;
-    }
-    return '';
-  }
-
-  function normalizeHost(hostname) {
-    return hostname.toLowerCase().replace(/^www\./, '');
-  }
-
-  function normalizePath(pathname) {
-    if (!pathname || pathname === '/') return '/';
-    return pathname.replace(/\/+$/, '') || '/';
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Channel masthead                                                    */
-  /* ------------------------------------------------------------------ */
-
-  function ensureChannelHeader() {
-    if (!prefs.enabled || IS_HOME || PAGE_INFO.type === 'live' || PAGE_INFO.type === 'detail') return;
-    if (channelHead?.isConnected) return;
-
-    const anchor = document.querySelector('#middle')
-      || document.querySelector('.container.top_20')
-      || document.querySelector('#record.vct-main');
-    if (!anchor) return;
-
-    const copy = channelHeadCopy();
-    const count = channelContentCount();
-
-    channelHead = document.createElement('section');
-    channelHead.className = 'zb8-channel-head';
-    channelHead.dataset.zb8Ui = 'channel-head';
-    channelHead.dataset.channelLabel = copy.mark;
-
-    const intro = document.createElement('div');
-    intro.className = 'zb8-channel-copy';
-
-    const eyebrow = document.createElement('span');
-    eyebrow.className = 'zb8-channel-eyebrow';
-    const dot = document.createElement('i');
-    dot.setAttribute('aria-hidden', 'true');
-    eyebrow.append(dot, document.createTextNode(copy.eyebrow));
-
-    const title = document.createElement('h1');
-    title.textContent = copy.title;
-
-    const sub = document.createElement('p');
-    sub.textContent = copy.subtitle;
-
-    intro.append(eyebrow, title, sub);
-
-    const meta = document.createElement('div');
-    meta.className = 'zb8-channel-meta';
-    const countEl = document.createElement('span');
-    countEl.className = 'zb8-channel-count';
-    countEl.textContent = count;
-    const badge = document.createElement('span');
-    badge.className = 'zb8-channel-badge';
-    badge.textContent = 'LIVEB8 · MODERN';
-    meta.append(countEl, badge);
-
-    channelHead.append(intro, meta);
-    anchor.parentNode.insertBefore(channelHead, anchor);
-  }
-
-  function channelHeadCopy() {
-    const news = window.location.hostname === 'news.zhibo8.com';
-    if (PAGE_INFO.type === 'zixun') {
-      const sport = PAGE_INFO.channel === 'nba' ? 'NBA' : '足球';
-      return {
-        eyebrow: `${PAGE_INFO.channel === 'nba' ? 'NBA' : 'FOOTBALL'} · ${news ? 'NEWSROOM' : 'HIGHLIGHTS'}`,
-        title: `${sport} ${news ? '资讯' : '视频'}`,
-        subtitle: news ? '最新消息、赛后采访与深度观察' : '最新集锦、采访与赛场瞬间',
-        mark: PAGE_INFO.channel === 'nba' ? 'NBA' : 'FOOTBALL',
-      };
-    }
-
-    if (PAGE_INFO.type === 'media') {
-      const label = document.querySelector('.list-news .tlt')?.textContent.trim();
-      const fallback = PAGE_INFO.channel === 'dianjing' ? '电竞' : '综合';
-      const isVideo = label?.includes('视频');
-      return {
-        eyebrow: PAGE_INFO.channel === 'dianjing' ? 'ESPORTS · CHANNEL' : 'MULTI-SPORT · CHANNEL',
-        title: label || fallback,
-        subtitle: isVideo ? '赛场高光与热门片段' : '最新动态与赛场资讯',
-        mark: PAGE_INFO.channel === 'dianjing' ? 'ESPORTS' : 'SPORTS',
-      };
-    }
-
-    return {
-      eyebrow: 'RESULTS · ARCHIVE',
-      title: '完赛赛程',
-      subtitle: '近期已结束比赛的比分与赛程回顾',
-      mark: 'RESULTS',
-    };
-  }
-
-  function channelContentCount() {
-    if (PAGE_INFO.type === 'zixun') {
-      const count = document.querySelectorAll('#middle .m_left .video').length;
-      return `${count} 个话题`;
-    }
-    if (PAGE_INFO.type === 'media') {
-      const count = document.querySelectorAll('.boxnew').length;
-      return `${count} 条内容`;
-    }
-    const count = document.querySelectorAll('#record .vct-box ._content li').length;
-    return count ? `${count} 场记录` : '赛程归档';
-  }
-
-  function removeChannelHeader() {
-    channelHead?.remove();
-    channelHead = null;
-    document.querySelector('.zb8-channel-head')?.remove();
   }
 
   /* ------------------------------------------------------------------ */
@@ -587,7 +330,7 @@
   }
 
   function scheduleScan() {
-    if (!prefs.enabled || !IS_HOME) return;
+    if (!prefs.enabled) return;
     window.clearTimeout(scanTimer);
     scanTimer = window.setTimeout(() => {
       if (!prefs.enabled) return;
@@ -946,13 +689,8 @@
     lastSignature = '';
     undockSchedulePopover(document.querySelector('.schedule > .more-stype'));
     removeHero();
-    removeChannelHeader();
     navButton?.remove();
     navButton = null;
     document.querySelector('.schedule#zb8-schedule')?.removeAttribute('id');
-    document.querySelectorAll('.menu .zb8-nav-active').forEach((node) => {
-      node.classList.remove('zb8-nav-active');
-      node.removeAttribute('aria-current');
-    });
   }
 })();
