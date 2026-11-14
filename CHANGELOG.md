@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fixed team-zone labels overlapping the points column in the homepage standings table.
+- Added Chrome Web Store listing copy, privacy answers, test instructions, screenshots, and promo assets under `store/`.
+
 ## 1.1.1 — 2026-11-08
 
 - Reverted the multi-page expansion. Only the zhibo8.com homepage is themed again; channels, live match pages, schedules, and content details keep the original site.

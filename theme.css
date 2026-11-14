@@ -1831,15 +1831,18 @@ html.zb8-on .rank-list ._lists ._list:hover {
 
 html.zb8-on .rank-list ._lists .data-list ._list ._label {
   top: 50%;
-  right: 8px;
-  height: 15px;
-  padding: 0 6px;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 8px;
-  line-height: 15px;
+  left: 0;
+  right: auto;
+  width: 4px;
+  height: 22px;
+  padding: 0;
+  overflow: hidden;
+  color: transparent;
+  border-radius: 3px;
+  font-size: 0;
+  line-height: 0;
   transform: translateY(-50%);
-  opacity: 0.9;
+  opacity: 1;
 }
 
 html.zb8-on .rank-list .team *,

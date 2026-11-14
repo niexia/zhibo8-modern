@@ -1,0 +1,21 @@
+# Test instructions / 测试说明
+
+## English
+
+1. Install the extension and open https://zhibo8.com/ . No account or login is required.
+2. The homepage should show the modern theme: the left navigation contains only "首页", a theme switch is at the top right, and the "比赛日" matchday rail and card grid are visible.
+3. Click the sun/moon button at the top right. The page theme should toggle. Open the extension action popup and try the Auto / Light / Dark options; the page updates immediately.
+4. In the popup, turn "精简顶部导航" off and on. The full menu should appear and then collapse back to only "首页".
+5. Turn off the main enable switch in the popup. The homepage should immediately return to the original zhibo8 layout. Turn it back on to restore the theme.
+6. Open https://zhibo8.com/nba/ . It should remain the original site by design; only the homepage is themed.
+7. Refresh the homepage and confirm the saved theme and simplified-navigation setting persist.
+
+## 中文
+
+1. 安装扩展后打开 https://zhibo8.com/ ，无需登录。
+2. 首页应显示现代主题：左侧导航只有「首页」，右上角有主题按钮，并显示「比赛日」速览和内容卡片。
+3. 点击右上角太阳/月亮按钮可切换主题；打开扩展弹窗，可切换跟随系统 / 浅色 / 深色，页面会立即生效。
+4. 在弹窗中关闭再打开「精简顶部导航」：完整菜单应出现，再收起为只显示「首页」。
+5. 关闭弹窗中的总开关，首页应立即恢复原站；重新打开开关可恢复主题。
+6. 打开 https://zhibo8.com/nba/ ，该页面应保持原站样式（扩展只改首页）。
+7. 刷新首页，确认主题和精简导航设置被保留。
