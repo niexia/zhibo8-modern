@@ -49,23 +49,9 @@
 
 ### 扩展弹窗
 
-<p align="center">
-  <a href="docs/screenshots/popup-light.png"><img src="docs/screenshots/popup-light.png" width="46%" alt="扩展弹窗浅色主题"></a>
-  &nbsp;&nbsp;
-  <a href="docs/screenshots/popup-dark.png"><img src="docs/screenshots/popup-dark.png" width="46%" alt="扩展弹窗深色主题"></a>
-</p>
-
-## Chrome Web Store
-
-商店上架资料已经整理在 [store/README.md](store/README.md)，包括：
-
-- [商品页文案](store/listing-zh-CN.md)
-- [完整描述纯文本](store/description.txt)
-- [隐私问卷答案](store/privacy-practices.md)
-- [审核测试说明](store/test-instructions.txt)
-- [5 张商店截图、图标与宣传图](store/assets/)
-
-当前状态：上架资料已准备完成，等待提交审核。审核通过后会在这里补充 Chrome Web Store 安装链接。
+<a href="docs/screenshots/popup.png">
+  <img src="docs/screenshots/popup.png" alt="扩展弹窗：浅色与深色主题" width="100%">
+</a>
 
 ## 安装
 

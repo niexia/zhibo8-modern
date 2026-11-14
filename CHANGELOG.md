@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Refreshed README screenshots with the new 1280x800 captures, and removed the pre-review Chrome Web Store section.
 - Fixed team-zone labels overlapping the points column in the homepage standings table.
 - Added Chrome Web Store listing copy, privacy answers, test instructions, screenshots, and promo assets under `store/`.
 
